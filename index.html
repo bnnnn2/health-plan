@@ -936,6 +936,7 @@ function pushupRedoDay() {
   ps.sets = {};
   ps.actualReps = {};
   ps.sessionDone = false;
+  if (ps.history) delete ps.history[todayStr];
   savePushupState(ps);
   render();
 }

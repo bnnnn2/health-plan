@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>복남 헬스 플랜</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f0f; color: #fff; font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; min-height: 100vh; }
+
+  .header { background: #1a1a1a; padding: 20px 16px 16px; text-align: center; border-bottom: 1px solid #2a2a2a; }
+  .header .date { font-size: 13px; color: #888; margin-bottom: 4px; }
+  .header .day-title { font-size: 22px; font-weight: 700; }
+  .header .day-sub { font-size: 14px; color: #888; margin-top: 4px; }
+
+  .progress-bar { height: 4px; background: #2a2a2a; }
+  .progress-fill { height: 4px; background: linear-gradient(90deg, #00c6ff, #0072ff); transition: width 0.4s; }
+
+  .section { margin: 16px 12px 0; }
+  .section-title { font-size: 12px; color: #888; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; padding-left: 4px; }
+
+  .exercise-card {
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1.5px solid #2a2a2a;
+    transition: border-color 0.2s;
+  }
+  .exercise-card.done { border-color: #00c6ff44; background: #00c6ff08; }
+
+  .ex-top { display: flex; align-items: center; justify-content: space-between; }
+  .ex-name { font-size: 16px; font-weight: 600; }
+  .ex-done-badge { font-size: 12px; color: #00c6ff; font-weight: 700; display: none; }
+  .exercise-card.done .ex-done-badge { display: block; }
+  .exercise-card.done .ex-name { color: #555; }
+
+  .ex-info { font-size: 12px; color: #666; margin-top: 4px; }
+
+  .sets-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .set-btn {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    border: 2px solid #333;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .set-btn:active { transform: scale(0.92); }
+  .set-btn.completed { background: #00c6ff22; border-color: #00c6ff; color: #00c6ff; }
+  .set-btn.completed::after { content: '✓'; }
+  .set-btn.completed span { display: none; }
+
+  .rest-day { text-align: center; padding: 60px 20px; }
+  .rest-day .icon { font-size: 60px; margin-bottom: 16px; }
+  .rest-day h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .rest-day p { color: #888; font-size: 14px; line-height: 1.6; }
+
+  .complete-banner {
+    background: linear-gradient(135deg, #00c6ff22, #0072ff22);
+    border: 1.5px solid #00c6ff55;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin: 16px 12px;
+    display: none;
+  }
+  .complete-banner.show { display: block; }
+  .complete-banner h3 { font-size: 18px; font-weight: 700; color: #00c6ff; }
+  .complete-banner p { font-size: 13px; color: #888; margin-top: 6px; }
+
+  .bottom-space { height: 40px; }
+
+  .nav-dots { display: flex; justify-content: center; gap: 8px; padding: 16px; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
+  .nav-dot.active { background: #00c6ff; }
+  .nav-dot.workout { background: #444; }
+
+  .tip-box { background: #1a1a1a; border-radius: 12px; padding: 14px 16px; margin: 0 12px 10px; border-left: 3px solid #0072ff; }
+  .tip-box p { font-size: 13px; color: #aaa; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const PLAN = {
+  1: { // 월
+    title: '가슴 + 어깨',
+    emoji: '💪',
+    color: '#00c6ff',
+    exercises: [
+      { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서' },
+      { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치' },
+      { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!' },
+      { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로' },
+    ]
+  },
+  2: { // 화
+    title: '등 + 이두',
+    emoji: '🔙',
+    color: '#7c3aed',
+    exercises: [
+      { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동' },
+      { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기' },
+      { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정' },
+    ]
+  },
+  3: { // 수 - 휴식
+    rest: true
+  },
+  4: { // 목
+    title: '어깨 + 삼두',
+    emoji: '🏋️',
+    color: '#f59e0b',
+    exercises: [
+      { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지' },
+      { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수' },
+      { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감' },
+      { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기' },
+    ]
+  },
+  5: { // 금 - 휴식
+    rest: true
+  },
+  6: { // 토
+    title: '하체 + 허리 + 복근',
+    emoji: '🦵',
+    color: '#10b981',
+    exercises: [
+      { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨' },
+      { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기' },
+      { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정' },
+      { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심' },
+      { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게' },
+      { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게' },
+    ]
+  },
+  0: { // 일 - 휴식
+    rest: true
+  }
+};
+
+const WARMUP = [
+  { name: '고양이-소 스트레칭', duration: '1분', tip: '척추 풀기. 천천히 호흡하면서' },
+  { name: '햄스트링 스트레칭', duration: '1분', tip: '허리 당김 해소' },
+  { name: '흉추 회전 스트레칭', duration: '1분', tip: '뻣뻣한 등 풀기' },
+  { name: '트레드밀 워킹', duration: '7분', tip: '가볍게 걷기. 몸 깨우기' },
+];
+
+const COOLDOWN = [
+  { name: '가슴 스트레칭', duration: '30초', tip: '벽에 손 짚고 몸 돌리기' },
+  { name: '어깨 교차 스트레칭', duration: '30초', tip: '팔 가슴 앞으로 당기기' },
+  { name: '고양이-소 스트레칭', duration: '1분', tip: '운동 후 척추 정리' },
+  { name: '허리 돌리기', duration: '1분', tip: '앉아서 좌우로 천천히' },
+];
+
+// 상태 저장
+const today = new Date();
+const dayKey = today.getDay();
+const dateStr = today.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+const storageKey = `workout_${today.toISOString().slice(0,10)}`;
+
+let state = JSON.parse(localStorage.getItem(storageKey) || 'null') || {
+  warmup: new Array(WARMUP.length).fill(false),
+  sets: {},
+  cooldown: new Array(COOLDOWN.length).fill(false),
+};
+
+function save() {
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+function getTotalSets() {
+  const plan = PLAN[dayKey];
+  if (!plan || plan.rest) return 0;
+  return plan.exercises.reduce((a, e) => a + e.sets, 0);
+}
+
+function getDoneSets() {
+  let done = 0;
+  const plan = PLAN[dayKey];
+  if (!plan || plan.rest) return 0;
+  plan.exercises.forEach((ex, ei) => {
+    for (let s = 0; s < ex.sets; s++) {
+      if (state.sets[`${ei}_${s}`]) done++;
+    }
+  });
+  return done;
+}
+
+function isAllDone() {
+  return getTotalSets() > 0 && getDoneSets() >= getTotalSets();
+}
+
+function render() {
+  const plan = PLAN[dayKey];
+  let html = '';
+
+  // 헤더
+  const dayNames = ['일','월','화','수','목','금','토'];
+  html += `
+    <div class="header">
+      <div class="date">${dateStr}</div>
+      <div class="day-title">${plan && !plan.rest ? plan.emoji + ' ' + plan.title : '🛌 휴식일'}</div>
+      ${!plan?.rest ? `<div class="day-sub">${getDoneSets()} / ${getTotalSets()} 세트 완료</div>` : ''}
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${getTotalSets() > 0 ? (getDoneSets()/getTotalSets()*100) : 0}%"></div>
+    </div>
+  `;
+
+  if (plan?.rest) {
+    html += `
+      <div class="rest-day">
+        <div class="icon">🛌</div>
+        <h2>오늘은 휴식일</h2>
+        <p>근육은 쉬는 동안 성장해.<br>충분한 수면과 단백질 섭취 잊지 마.</p>
+      </div>
+    `;
+  } else {
+
+    // 완료 배너
+    html += `<div class="complete-banner ${isAllDone() ? 'show' : ''}">
+      <h3>💪 오늘 운동 완료!</h3>
+      <p>쿨다운까지 마무리하면 완벽해</p>
+    </div>`;
+
+    // 워밍업
+    html += `<div class="section"><div class="section-title">🔥 워밍업 (10분)</div>`;
+    WARMUP.forEach((w, i) => {
+      const done = state.warmup[i];
+      html += `
+        <div class="exercise-card ${done ? 'done' : ''}" onclick="toggleWarmup(${i})">
+          <div class="ex-top">
+            <div class="ex-name">${w.name}</div>
+            <div class="ex-done-badge">완료</div>
+          </div>
+          <div class="ex-info">${w.duration} · ${w.tip}</div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+
+    // 본 운동
+    html += `<div class="section"><div class="section-title">💪 본 운동</div>`;
+    plan.exercises.forEach((ex, ei) => {
+      const doneSets = Array.from({length: ex.sets}, (_, s) => state.sets[`${ei}_${s}`] || false);
+      const allDone = doneSets.every(Boolean);
+      html += `
+        <div class="exercise-card ${allDone ? 'done' : ''}">
+          <div class="ex-top">
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-done-badge">완료</div>
+          </div>
+          <div class="ex-info">${ex.sets}세트 × ${ex.reps} · ${ex.tip}</div>
+          <div class="sets-row">
+      `;
+      for (let s = 0; s < ex.sets; s++) {
+        const done = state.sets[`${ei}_${s}`] || false;
+        html += `<button class="set-btn ${done ? 'completed' : ''}" onclick="toggleSet(${ei}, ${s})">
+          <span>${s+1}</span>
+        </button>`;
+      }
+      html += `</div></div>`;
+    });
+    html += `</div>`;
+
+    // 쿨다운
+    html += `<div class="section"><div class="section-title">❄️ 쿨다운 (5분)</div>`;
+    COOLDOWN.forEach((c, i) => {
+      const done = state.cooldown[i];
+      html += `
+        <div class="exercise-card ${done ? 'done' : ''}" onclick="toggleCooldown(${i})">
+          <div class="ex-top">
+            <div class="ex-name">${c.name}</div>
+            <div class="ex-done-badge">완료</div>
+          </div>
+          <div class="ex-info">${c.duration} · ${c.tip}</div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+
+  // 요일 네비
+  html += `<div class="nav-dots">`;
+  ['일','월','화','수','목','금','토'].forEach((d, i) => {
+    const hasPlan = PLAN[i] && !PLAN[i].rest;
+    html += `<div class="nav-dot ${i === dayKey ? 'active' : (hasPlan ? 'workout' : '')}" title="${d}"></div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="bottom-space"></div>`;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+function toggleWarmup(i) {
+  state.warmup[i] = !state.warmup[i];
+  save(); render();
+}
+
+function toggleSet(ei, s) {
+  const key = `${ei}_${s}`;
+  state.sets[key] = !state.sets[key];
+  save(); render();
+}
+
+function toggleCooldown(i) {
+  state.cooldown[i] = !state.cooldown[i];
+  save(); render();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -53,6 +53,21 @@
 
   .bottom-space { height: 40px; }
 
+  /* 패스 버튼 */
+  .pass-btn-wrap { padding: 8px 12px 24px; }
+  .pass-btn { width: 100%; padding: 16px; border-radius: 14px; border: 1.5px solid #444; background: #1a1a1a; color: #888; font-size: 15px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+  .pass-btn:active { transform: scale(0.97); }
+
+  /* 패스된 날 화면 */
+  .passed-day { text-align: center; padding: 60px 20px; }
+  .passed-day .icon { font-size: 60px; margin-bottom: 16px; }
+  .passed-day h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #888; }
+  .passed-day p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+  .pass-cancel-btn { background: #1a1a1a; border: 1.5px solid #444; color: #aaa; padding: 12px 28px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+  /* 달력 패스 dot */
+  .cal-dot.passed { background: #555; }
+
   /* 캘린더 */
   .calendar-wrap { padding: 16px 12px; }
   .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -186,6 +201,7 @@ function getState(dateStr) {
     warmup: new Array(WARMUP.length).fill(false),
     sets: {},
     cooldown: new Array(COOLDOWN.length).fill(false),
+    passed: false,
   };
 }
 
@@ -220,8 +236,9 @@ function getDayStatus(dateStr) {
   const dow = getDayOfWeek(dateStr);
   const plan = PLAN[dow];
   if (!plan || plan.rest) return 'rest';
-  const total = getTotalSets(dow);
   const state = getState(dateStr);
+  if (state.passed) return 'passed';
+  const total = getTotalSets(dow);
   const done = getDoneSetsFromState(dow, state);
   if (done === 0) return 'workout';
   if (done >= total) return 'completed';
@@ -271,6 +288,13 @@ function renderWorkout(dateStr) {
 
   if (plan?.rest) {
     html += `<div class="rest-day"><div class="icon">🛌</div><h2>휴식일</h2><p>근육은 쉬는 동안 성장해.<br>충분한 수면과 단백질 섭취!</p></div>`;
+  } else if (state.passed) {
+    html += `<div class="passed-day">
+      <div class="icon">😴</div>
+      <h2>오늘은 패스</h2>
+      <p>가끔은 쉬는 것도 용기야.<br>내일 다시 하면 돼!</p>
+      <button class="pass-cancel-btn" onclick="cancelPass('${dateStr}')">패스 취소하고 운동하기</button>
+    </div>`;
   } else {
     html += `<div class="complete-banner ${allDone?'show':''}"><h3>💪 운동 완료!</h3><p>쿨다운까지 마무리하면 완벽해</p></div>`;
 
@@ -309,6 +333,13 @@ function renderWorkout(dateStr) {
       </div>`;
     });
     html += `</div>`;
+
+    // 패스 버튼 (운동 완료 전에만 표시)
+    if (!allDone) {
+      html += `<div class="pass-btn-wrap">
+        <button class="pass-btn" onclick="passToday('${dateStr}')">오늘 운동 패스</button>
+      </div>`;
+    }
   }
   return html;
 }
@@ -339,7 +370,7 @@ function renderCalendar() {
     const isSelected = ds === selectedDate;
     const isSun = dow === 0;
     const isSat = dow === 6;
-    const dotClass = status === 'completed' ? 'completed' : status === 'partial' ? 'partial' : status === 'workout' ? 'workout' : '';
+    const dotClass = status === 'completed' ? 'completed' : status === 'partial' ? 'partial' : status === 'passed' ? 'passed' : status === 'workout' ? 'workout' : '';
 
     html += `<div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''} ${status==='rest'?'rest-type':''} ${isSun?'sun':''} ${isSat?'sat':''}" onclick="selectDate('${ds}')">
       <div class="cal-num">${d}</div>
@@ -358,7 +389,9 @@ function renderCalendar() {
   html += `<div class="cal-detail">
     <h3>${selLabel} ${selPlan && !selPlan.rest ? selPlan.emoji + ' ' + selPlan.title : '🛌 휴식일'}</h3>`;
 
-  if (selPlan && !selPlan.rest) {
+  if (selPlan && !selPlan.rest && selState.passed) {
+    html += `<div style="color:#666;font-size:14px;padding:8px 0">😴 패스한 날</div>`;
+  } else if (selPlan && !selPlan.rest) {
     selPlan.exercises.forEach((ex, ei) => {
       const doneSets = Array.from({length: ex.sets}, (_, s) => selState.sets[`${ei}_${s}`] || false).filter(Boolean).length;
       const exDone = doneSets === ex.sets;
@@ -396,6 +429,21 @@ function switchTab(tab) { currentTab = tab; render(); }
 function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} render(); }
 function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} render(); }
 function selectDate(ds) { selectedDate = ds; render(); }
+
+function passToday(dateStr) {
+  if (!confirm('오늘 운동을 패스할까요?')) return;
+  const s = getState(dateStr);
+  s.passed = true;
+  saveState(dateStr, s);
+  render();
+}
+
+function cancelPass(dateStr) {
+  const s = getState(dateStr);
+  s.passed = false;
+  saveState(dateStr, s);
+  render();
+}
 
 function toggleWarmup(dateStr, i) {
   const s = getState(dateStr); s.warmup[i] = !s.warmup[i]; saveState(dateStr, s); render();

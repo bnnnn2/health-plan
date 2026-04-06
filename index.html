@@ -698,7 +698,7 @@ const PUSHUP_TEST_INFO = {
 function getPushupState() {
   return JSON.parse(localStorage.getItem('pushup_challenge') || 'null') || {
     week: 1, day: 1, sets: {}, sessionDone: false, needTest: false,
-    totalDone: 0, startDate: todayStr,
+    totalDone: 0, startDate: todayStr, actualReps: {},
   };
 }
 function savePushupState(s) { localStorage.setItem('pushup_challenge', JSON.stringify(s)); }
@@ -768,13 +768,21 @@ function renderPushup() {
   let allDone = true;
   sets.forEach((rep, i) => {
     const isPlus = String(rep).endsWith('+');
-    const repNum = isPlus ? rep : rep;
     const done = ps.sets[i] || false;
+    const actual = ps.actualReps ? ps.actualReps[i] : null;
     if (!done) allDone = false;
     html += `<div class="pu-set-row ${done?'done':''}">
-      <div>
+      <div style="flex:1">
         <div class="pu-set-num">세트 ${i+1}</div>
-        <div class="pu-set-reps ${isPlus?'plus':''}">${repNum}<span style="font-size:14px;font-weight:400"> 개${isPlus?' (최대한)':''}</span></div>
+        <div class="pu-set-reps ${isPlus?'plus':''}">${rep}<span style="font-size:14px;font-weight:400"> 개${isPlus?' (최대한)':''}</span></div>
+        ${isPlus && done ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:#888">실제:</span>
+          <input type="number" min="0" max="200" value="${actual||''}" placeholder="?"
+            style="width:60px;background:#222;border:1px solid #444;border-radius:6px;color:#ef4444;font-size:16px;font-weight:700;padding:4px 8px;text-align:center"
+            onchange="pushupSaveActual(${i}, this.value)" onclick="event.stopPropagation()" />
+          <span style="font-size:12px;color:#888">개</span>
+          ${actual ? `<span style="font-size:11px;color:#ef4444;font-weight:700">✓ ${actual}개 기록됨</span>` : ''}
+        </div>` : ''}
       </div>
       <button class="pu-set-check" onclick="pushupToggleSet(${i})">${done?'✓':''}</button>
     </div>`;
@@ -798,6 +806,12 @@ function renderPushup() {
   } else {
     html += `<button class="pu-next-btn" disabled>세트를 모두 완료하세요</button>`;
   }
+
+  // 이전 주차 / 다시하기 버튼
+  html += `<div style="display:flex;gap:8px;margin:0 12px 8px">
+    ${week > 1 ? `<button onclick="pushupGoBack()" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #444;background:#1a1a1a;color:#888;font-size:13px;font-weight:600;cursor:pointer">◀ 이전 주차로</button>` : ''}
+    <button onclick="pushupRedoDay()" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #444;background:#1a1a1a;color:#888;font-size:13px;font-weight:600;cursor:pointer">🔄 오늘 다시하기</button>
+  </div>`;
 
   html += `<div class="bottom-space"></div>`;
   return html;
@@ -855,6 +869,38 @@ function pushupNextWeek() {
   const ps = getPushupState();
   ps.needTest = false;
   ps.sets = {};
+  ps.actualReps = {};
+  ps.sessionDone = false;
+  savePushupState(ps);
+  render();
+}
+
+function pushupSaveActual(setIdx, val) {
+  const ps = getPushupState();
+  if (!ps.actualReps) ps.actualReps = {};
+  ps.actualReps[setIdx] = parseInt(val) || 0;
+  savePushupState(ps);
+  render();
+}
+
+function pushupGoBack() {
+  if (!confirm('이전 주차로 돌아갈까요?\n현재 진행 상황은 초기화됩니다.')) return;
+  const ps = getPushupState();
+  ps.week = Math.max(1, ps.week - 1);
+  ps.day = 1;
+  ps.sets = {};
+  ps.actualReps = {};
+  ps.sessionDone = false;
+  ps.needTest = false;
+  savePushupState(ps);
+  render();
+}
+
+function pushupRedoDay() {
+  if (!confirm('오늘 세션을 다시 시작할까요?')) return;
+  const ps = getPushupState();
+  ps.sets = {};
+  ps.actualReps = {};
   ps.sessionDone = false;
   savePushupState(ps);
   render();

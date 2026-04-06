@@ -86,39 +86,71 @@
   .cal-detail-name { font-size: 14px; flex: 1; }
   .cal-detail-sets { font-size: 12px; color: #666; }
   .cal-detail-sets.done { color: #00c6ff; }
+
+  /* 휴식 타이머 오버레이 */
+  .timer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .timer-overlay.hidden { display: none; }
+  .timer-title { font-size: 14px; color: #888; margin-bottom: 6px; letter-spacing: 1px; }
+  .timer-exname { font-size: 20px; font-weight: 700; margin-bottom: 32px; }
+  .timer-circle-wrap { position: relative; width: 180px; height: 180px; margin-bottom: 32px; }
+  .timer-svg { transform: rotate(-90deg); }
+  .timer-track { fill: none; stroke: #222; stroke-width: 10; }
+  .timer-prog { fill: none; stroke: #00c6ff; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .timer-sec { font-size: 52px; font-weight: 800; line-height: 1; }
+  .timer-label { font-size: 13px; color: #888; margin-top: 4px; }
+  .timer-skip { background: #1a1a1a; border: 1.5px solid #333; color: #fff; padding: 14px 40px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .timer-skip:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
+<!-- 휴식 타이머 오버레이 -->
+<div class="timer-overlay hidden" id="timerOverlay">
+  <div class="timer-title">🛑 세트 완료 · 휴식 시간</div>
+  <div class="timer-exname" id="timerExName"></div>
+  <div class="timer-circle-wrap">
+    <svg class="timer-svg" width="180" height="180" viewBox="0 0 180 180">
+      <circle class="timer-track" cx="90" cy="90" r="80"/>
+      <circle class="timer-prog" id="timerProg" cx="90" cy="90" r="80"/>
+    </svg>
+    <div class="timer-num">
+      <div class="timer-sec" id="timerSec">90</div>
+      <div class="timer-label">초</div>
+    </div>
+  </div>
+  <button class="timer-skip" onclick="skipTimer()">건너뛰기</button>
+</div>
+
 <div id="app"></div>
 
 <script>
 const PLAN = {
   1: { title: '가슴 + 어깨', emoji: '💪', color: '#00c6ff', exercises: [
-    { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서' },
-    { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치' },
-    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!' },
-    { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로' },
+    { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서', rest: 90 },
+    { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치', rest: 90 },
+    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!', rest: 60 },
+    { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로', rest: 60 },
   ]},
   2: { title: '등 + 이두', emoji: '🔙', color: '#7c3aed', exercises: [
-    { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동' },
-    { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기' },
-    { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정' },
+    { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동', rest: 90 },
+    { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기', rest: 90 },
+    { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정', rest: 60 },
   ]},
   3: { rest: true },
   4: { title: '어깨 + 삼두', emoji: '🏋️', color: '#f59e0b', exercises: [
-    { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지' },
-    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수' },
-    { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감' },
-    { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기' },
+    { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지', rest: 90 },
+    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수', rest: 60 },
+    { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감', rest: 60 },
+    { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기', rest: 60 },
   ]},
   5: { rest: true },
   6: { title: '하체 + 허리 + 복근', emoji: '🦵', color: '#10b981', exercises: [
-    { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨' },
-    { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기' },
-    { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정' },
-    { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심' },
-    { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게' },
-    { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게' },
+    { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨', rest: 90 },
+    { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기', rest: 60 },
+    { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정', rest: 60 },
+    { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심', rest: 90 },
+    { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게', rest: 60 },
+    { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게', rest: 60 },
   ]},
   0: { rest: true }
 };
@@ -369,10 +401,88 @@ function toggleWarmup(dateStr, i) {
   const s = getState(dateStr); s.warmup[i] = !s.warmup[i]; saveState(dateStr, s); render();
 }
 function toggleSet(dateStr, ei, s) {
-  const st = getState(dateStr); const key=`${ei}_${s}`; st.sets[key]=!st.sets[key]; saveState(dateStr, st); render();
+  const st = getState(dateStr);
+  const key = `${ei}_${s}`;
+  const wasOff = !st.sets[key];
+  st.sets[key] = !st.sets[key];
+  saveState(dateStr, st);
+  render();
+  // 세트 완료(체크) 시에만 타이머 시작
+  if (wasOff) {
+    const dow = getDayOfWeek(dateStr);
+    const plan = PLAN[dow];
+    if (plan && !plan.rest && plan.exercises[ei]) {
+      const ex = plan.exercises[ei];
+      // 마지막 세트면 타이머 안 띄움
+      const allDone = Array.from({length: ex.sets}, (_, idx) => st.sets[`${ei}_${idx}`] || false).every(Boolean);
+      if (!allDone) {
+        startTimer(ex.name, ex.rest || 60);
+      }
+    }
+  }
 }
 function toggleCooldown(dateStr, i) {
   const s = getState(dateStr); s.cooldown[i] = !s.cooldown[i]; saveState(dateStr, s); render();
+}
+
+// ===== 휴식 타이머 =====
+let timerInterval = null;
+let timerRemaining = 0;
+const CIRCUMFERENCE = 2 * Math.PI * 80; // r=80
+
+function startTimer(exName, seconds) {
+  clearInterval(timerInterval);
+  timerRemaining = seconds;
+  document.getElementById('timerExName').textContent = exName;
+  document.getElementById('timerOverlay').classList.remove('hidden');
+  updateTimerUI(seconds, seconds);
+
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerUI(timerRemaining, seconds);
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      // 진동 알림
+      if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+      // 소리 알림
+      playBeep();
+      setTimeout(() => {
+        document.getElementById('timerOverlay').classList.add('hidden');
+      }, 800);
+    }
+  }, 1000);
+}
+
+function updateTimerUI(remaining, total) {
+  document.getElementById('timerSec').textContent = remaining;
+  const prog = document.getElementById('timerProg');
+  prog.style.strokeDasharray = CIRCUMFERENCE;
+  prog.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / total);
+  // 색상 변화: 여유→노랑→빨강
+  const ratio = remaining / total;
+  const color = ratio > 0.5 ? '#00c6ff' : ratio > 0.25 ? '#f59e0b' : '#ff4444';
+  prog.style.stroke = color;
+}
+
+function skipTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('timerOverlay').classList.add('hidden');
+}
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.3, 0.6].forEach(t => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+      o.start(ctx.currentTime + t);
+      o.stop(ctx.currentTime + t + 0.2);
+    });
+  } catch(e) {}
 }
 
 render();

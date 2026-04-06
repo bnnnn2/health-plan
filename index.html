@@ -604,9 +604,13 @@ function renderCalendar() {
     const isSat = dow === 6;
     const dotClass = status === 'completed' ? 'completed' : status === 'partial' ? 'partial' : status === 'passed' ? 'passed' : status === 'workout' ? 'workout' : '';
 
+    const puInfo = getPushupForDate(ds);
     html += `<div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''} ${status==='rest'?'rest-type':''} ${isSun?'sun':''} ${isSat?'sat':''}" onclick="selectDate('${ds}')">
       <div class="cal-num">${d}</div>
-      ${dotClass ? `<div class="cal-dot ${dotClass}"></div>` : '<div style="height:8px"></div>'}
+      <div style="display:flex;gap:2px;align-items:center;margin-top:2px">
+        ${dotClass ? `<div class="cal-dot ${dotClass}" style="margin-top:0"></div>` : '<div style="width:5px;height:5px"></div>'}
+        ${puInfo ? `<div style="width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>` : ''}
+      </div>
     </div>`;
   }
   html += `</div>`;
@@ -644,13 +648,35 @@ function renderCalendar() {
     html += `<div style="color:#666;font-size:14px;padding:8px 0">오늘은 쉬어가는 날!</div>`;
   }
 
+  // 푸시업 챌린지 완료 표시
+  const selPuInfo = getPushupForDate(selectedDate);
+  if (selPuInfo) {
+    const prog = PUSHUP_PROGRAM[selPuInfo.week];
+    const sets = prog ? prog.days[selPuInfo.day - 1] : [];
+    const lastSet = sets[sets.length - 1];
+    const isPlus = String(lastSet).endsWith('+');
+    const actualMax = selPuInfo.actualReps && selPuInfo.actualReps[sets.length - 1];
+    html += `<div style="margin-top:10px;border-top:1px solid #2a2a2a;padding-top:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>
+        <span style="font-size:13px;font-weight:700;color:#ef4444">푸시업 챌린지</span>
+        <span style="font-size:12px;color:#888">${selPuInfo.week}주차 Day${selPuInfo.day}</span>
+      </div>
+      <div style="font-size:12px;color:#666;padding-left:16px">
+        세트: ${sets.join(' · ')} 개
+        ${actualMax ? `<span style="color:#ef4444;font-weight:700;margin-left:6px">최대 ${actualMax}개 달성</span>` : ''}
+      </div>
+    </div>`;
+  }
+
   html += `</div>`;
 
   // 범례
-  html += `<div style="display:flex;gap:16px;padding:12px 4px;font-size:12px;color:#666;">
-    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#00c6ff"></div>완료</div>
-    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></div>일부완료</div>
-    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#333"></div>운동일</div>
+  html += `<div style="display:flex;gap:12px;padding:12px 4px;font-size:12px;color:#666;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#00c6ff"></div>헬스완료</div>
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#f59e0b"></div>일부완료</div>
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#333"></div>운동일</div>
+    <div style="display:flex;align-items:center;gap:4px"><div style="width:7px;height:7px;border-radius:50%;background:#ef4444"></div>푸시업완료</div>
   </div>`;
 
   html += `</div>`;
@@ -837,8 +863,16 @@ function pushupCompleteSession() {
   const ps = getPushupState();
   ps.sessionDone = true;
   ps.totalDone = (ps.totalDone || 0) + 1;
+  // 날짜별 히스토리 저장
+  if (!ps.history) ps.history = {};
+  ps.history[todayStr] = { week: ps.week, day: ps.day, actualReps: ps.actualReps || {} };
   savePushupState(ps);
   render();
+}
+
+function getPushupForDate(dateStr) {
+  const ps = getPushupState();
+  return (ps.history && ps.history[dateStr]) ? ps.history[dateStr] : null;
 }
 
 function pushupAdvance() {

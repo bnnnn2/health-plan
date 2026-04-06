@@ -70,6 +70,45 @@
   /* 달력 패스 dot */
   .cal-dot.passed { background: #555; }
 
+  /* ===== 푸시업 챌린지 ===== */
+  .pu-header { background: #1a1a1a; padding: 20px 16px 16px; text-align: center; border-bottom: 1px solid #2a2a2a; }
+  .pu-badge { display: inline-block; background: #ef444422; border: 1px solid #ef444455; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; color: #ef4444; margin-bottom: 10px; }
+  .pu-title { font-size: 22px; font-weight: 700; }
+  .pu-sub { font-size: 13px; color: #888; margin-top: 4px; }
+
+  .pu-sets { padding: 16px 12px; }
+  .pu-set-row { background: #1a1a1a; border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1.5px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+  .pu-set-row.done { border-color: #ef444444; background: #ef444408; }
+  .pu-set-num { font-size: 13px; color: #666; font-weight: 600; }
+  .pu-set-reps { font-size: 28px; font-weight: 800; }
+  .pu-set-reps.plus { color: #ef4444; }
+  .pu-set-label { font-size: 11px; color: #888; }
+  .pu-set-check { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #333; background: #222; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; transition: all 0.15s; flex-shrink: 0; }
+  .pu-set-check:active { transform: scale(0.9); }
+  .pu-set-row.done .pu-set-check { background: #ef444422; border-color: #ef4444; color: #ef4444; }
+
+  .pu-rest-info { text-align: center; font-size: 12px; color: #666; margin: 4px 0 12px; }
+
+  .pu-progress { background: #1a1a1a; border-radius: 14px; padding: 16px; margin: 0 12px 12px; }
+  .pu-prog-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .pu-prog-label { font-size: 12px; color: #888; }
+  .pu-prog-val { font-size: 13px; font-weight: 700; color: #ef4444; }
+  .pu-week-dots { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .pu-week-dot { width: 10px; height: 10px; border-radius: 50%; background: #333; }
+  .pu-week-dot.done { background: #ef4444; }
+  .pu-week-dot.current { background: #ef4444; box-shadow: 0 0 0 2px #ef444466; }
+
+  .pu-next-btn { margin: 0 12px 12px; width: calc(100% - 24px); padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .pu-next-btn:active { transform: scale(0.98); }
+  .pu-next-btn:disabled { background: #333; color: #666; }
+
+  .pu-test-card { background: #f59e0b11; border: 1.5px solid #f59e0b55; border-radius: 14px; padding: 20px; margin: 0 12px 12px; text-align: center; }
+  .pu-test-card h3 { color: #f59e0b; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .pu-test-card p { color: #888; font-size: 13px; line-height: 1.6; }
+  .pu-col-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .pu-col-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #f59e0b55; background: #f59e0b11; color: #f59e0b; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .pu-col-btn:active { background: #f59e0b33; }
+
   /* 캘린더 */
   .calendar-wrap { padding: 16px 12px; }
   .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -439,10 +478,13 @@ function render() {
   html += `<div class="tab-bar">
     <div class="tab-btn ${currentTab==='today'?'active':''}" onclick="switchTab('today')">오늘 운동</div>
     <div class="tab-btn ${currentTab==='calendar'?'active':''}" onclick="switchTab('calendar')">📅 달력</div>
+    <div class="tab-btn ${currentTab==='pushup'?'active':''}" style="${currentTab==='pushup'?'color:#ef4444;border-bottom-color:#ef4444':''}" onclick="switchTab('pushup')">💪 푸시업</div>
   </div>`;
 
   if (currentTab === 'today') {
     html += renderWorkout(todayStr);
+  } else if (currentTab === 'pushup') {
+    html += renderPushup();
   } else {
     html += renderCalendar();
   }
@@ -616,6 +658,207 @@ function renderCalendar() {
 }
 
 function switchTab(tab) { currentTab = tab; render(); }
+
+// ===================================================
+// 푸시업 100개 챌린지 (hundredpushups.com - Column 1)
+// ===================================================
+const PUSHUP_PROGRAM = {
+  1: { restSec: [60,60,60], days: [
+    [2,3,2,2,'3+'], [3,4,2,3,'4+'], [4,5,4,4,'5+']
+  ]},
+  2: { restSec: [60,90,120], days: [
+    [4,6,4,4,'6+'], [5,6,4,4,'7+'], [5,7,5,5,'8+']
+  ]},
+  3: { restSec: [60,90,120], days: [
+    [10,12,7,7,'9+'], [10,12,8,8,'12+'], [11,13,9,9,'13+']
+  ]},
+  4: { restSec: [60,90,120], days: [
+    [12,14,11,10,'16+'], [14,16,12,12,'18+'], [16,18,13,13,'20+']
+  ]},
+  5: { restSec: [60,45,45], days: [
+    [17,19,15,15,'20+'],
+    [10,10,13,13,10,10,9,'25+'],
+    [13,13,15,15,12,12,10,'30+']
+  ]},
+  6: { restSec: [60,45,45], days: [
+    [25,30,20,15,'40+'],
+    [14,14,15,15,14,14,10,'44+'],
+    [13,13,17,17,16,16,14,'50+']
+  ]},
+};
+
+// 2주/4주/5주 완료 후 테스트 필요
+const PUSHUP_TEST_AFTER = [2, 4, 5];
+const PUSHUP_TEST_INFO = {
+  2: { title: '중간 테스트!', desc: '현재 최대 연속 푸시업을 측정하세요.\n16~20개 → 컬럼1 유지\n21~25개 → 더 높은 레벨 가능', ranges: ['16~20개 (현재 유지)', '21~25개', '26개+'] },
+  4: { title: '중간 테스트!', desc: '현재 최대 연속 푸시업을 측정하세요.\n31~35개 → 컬럼1 유지\n36개+ → 더 높은 레벨', ranges: ['31~35개 (현재 유지)', '36~40개', '40개+'] },
+  5: { title: '최종 테스트 전!', desc: '현재 최대 연속 푸시업을 측정하세요.\n46개+ 달성 시 6주차 진행', ranges: ['46~50개 (6주차 진행)', '51~60개', '60개+'] },
+};
+
+function getPushupState() {
+  return JSON.parse(localStorage.getItem('pushup_challenge') || 'null') || {
+    week: 1, day: 1, sets: {}, sessionDone: false, needTest: false,
+    totalDone: 0, startDate: todayStr,
+  };
+}
+function savePushupState(s) { localStorage.setItem('pushup_challenge', JSON.stringify(s)); }
+
+function renderPushup() {
+  const ps = getPushupState();
+  const week = ps.week;
+  const day = ps.day;
+  const prog = PUSHUP_PROGRAM[week];
+  const sets = prog ? prog.days[day - 1] : null;
+  const restSec = prog ? prog.restSec[day - 1] : 60;
+  const totalWeeks = 6;
+  const totalDays = week * 3 - (3 - day) - 1; // 누적 완료 세션 수
+
+  let html = '';
+
+  // 헤더
+  html += `<div class="pu-header">
+    <div class="pu-badge">100 푸시업 챌린지</div>
+    <div class="pu-title">${week}주차 · Day ${day}</div>
+    <div class="pu-sub">세트 간 휴식 ${restSec}초 · 마지막 세트는 최대한</div>
+  </div>`;
+
+  // 테스트 필요 상태
+  if (ps.needTest) {
+    const testInfo = PUSHUP_TEST_INFO[week - 1];
+    html += `<div class="pu-test-card" style="margin-top:16px">
+      <h3>🏆 ${testInfo.title}</h3>
+      <p>${testInfo.desc.replace(/\n/g, '<br>')}</p>
+      <p style="margin-top:8px;font-size:12px;color:#aaa">측정 후 아래 버튼으로 다음 단계 진행</p>
+      <div class="pu-col-btns">
+        ${testInfo.ranges.map((r, i) => `<button class="pu-col-btn" onclick="pushupNextWeek()">${r}</button>`).join('')}
+      </div>
+    </div>`;
+    html += `<div class="bottom-space"></div>`;
+    return html;
+  }
+
+  // 완료 상태
+  if (week > 6) {
+    html += `<div style="text-align:center;padding:60px 20px">
+      <div style="font-size:60px;margin-bottom:16px">🏆</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:8px">6주 완주!</div>
+      <div style="color:#888;font-size:14px">100 푸시업 챌린지 완료!<br>최종 테스트에 도전하세요.</div>
+    </div>`;
+    return html;
+  }
+
+  // 진행 상황 카드
+  html += `<div class="pu-progress">
+    <div class="pu-prog-row">
+      <span class="pu-prog-label">전체 진행</span>
+      <span class="pu-prog-val">${week}주차 / 6주</span>
+    </div>
+    <div class="pu-week-dots">`;
+  for (let w = 1; w <= 6; w++) {
+    for (let d = 1; d <= 3; d++) {
+      const isDone = w < week || (w === week && d < day);
+      const isCur = w === week && d === day;
+      html += `<div class="pu-week-dot ${isDone?'done':''} ${isCur?'current':''}"></div>`;
+    }
+  }
+  html += `</div></div>`;
+
+  // 세트 목록
+  html += `<div class="pu-sets">`;
+  let allDone = true;
+  sets.forEach((rep, i) => {
+    const isPlus = String(rep).endsWith('+');
+    const repNum = isPlus ? rep : rep;
+    const done = ps.sets[i] || false;
+    if (!done) allDone = false;
+    html += `<div class="pu-set-row ${done?'done':''}">
+      <div>
+        <div class="pu-set-num">세트 ${i+1}</div>
+        <div class="pu-set-reps ${isPlus?'plus':''}">${repNum}<span style="font-size:14px;font-weight:400"> 개${isPlus?' (최대한)':''}</span></div>
+      </div>
+      <button class="pu-set-check" onclick="pushupToggleSet(${i})">${done?'✓':''}</button>
+    </div>`;
+    if (i < sets.length - 1) {
+      html += `<div class="pu-rest-info">↓ 휴식 ${restSec}초</div>`;
+    }
+  });
+  html += `</div>`;
+
+  // 완료 버튼
+  if (allDone && !ps.sessionDone) {
+    html += `<button class="pu-next-btn" onclick="pushupCompleteSession()">✅ Day ${day} 완료!</button>`;
+  } else if (ps.sessionDone) {
+    const isLastDay = day === 3;
+    const needsTest = PUSHUP_TEST_AFTER.includes(week) && isLastDay;
+    html += `<div style="background:#ef444411;border:1.5px solid #ef444444;border-radius:14px;padding:16px;margin:0 12px 12px;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:#ef4444;margin-bottom:4px">Day ${day} 완료! 🔥</div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px">${isLastDay ? (needsTest ? '이번 주 완료! 소진 테스트 후 다음 주 진행' : `${week+1}주차로 진행하세요`) : `다음은 Day ${day+1}입니다`}</div>
+      <button class="pu-next-btn" onclick="pushupAdvance()" style="margin:0;width:100%">${isLastDay ? (needsTest ? '소진 테스트 하러가기 →' : `${week+1}주차 시작 →`) : `Day ${day+1} 시작 →`}</button>
+    </div>`;
+  } else {
+    html += `<button class="pu-next-btn" disabled>세트를 모두 완료하세요</button>`;
+  }
+
+  html += `<div class="bottom-space"></div>`;
+  return html;
+}
+
+function pushupToggleSet(i) {
+  const ps = getPushupState();
+  if (ps.sessionDone) return;
+  ps.sets[i] = !ps.sets[i];
+  savePushupState(ps);
+  render();
+  // 세트 완료 시 타이머
+  if (ps.sets[i]) {
+    const prog = PUSHUP_PROGRAM[ps.week];
+    const restSec = prog ? prog.restSec[ps.day - 1] : 60;
+    const sets = prog.days[ps.day - 1];
+    const isLast = i === sets.length - 1;
+    if (!isLast) startTimer('푸시업 휴식', restSec);
+  }
+}
+
+function pushupCompleteSession() {
+  const ps = getPushupState();
+  ps.sessionDone = true;
+  ps.totalDone = (ps.totalDone || 0) + 1;
+  savePushupState(ps);
+  render();
+}
+
+function pushupAdvance() {
+  const ps = getPushupState();
+  const isLastDay = ps.day === 3;
+  const needsTest = PUSHUP_TEST_AFTER.includes(ps.week) && isLastDay;
+  if (needsTest) {
+    ps.week += 1;
+    ps.day = 1;
+    ps.sets = {};
+    ps.sessionDone = false;
+    ps.needTest = true;
+  } else if (isLastDay) {
+    ps.week += 1;
+    ps.day = 1;
+    ps.sets = {};
+    ps.sessionDone = false;
+  } else {
+    ps.day += 1;
+    ps.sets = {};
+    ps.sessionDone = false;
+  }
+  savePushupState(ps);
+  render();
+}
+
+function pushupNextWeek() {
+  const ps = getPushupState();
+  ps.needTest = false;
+  ps.sets = {};
+  ps.sessionDone = false;
+  savePushupState(ps);
+  render();
+}
 function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} render(); }
 function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} render(); }
 function selectDate(ds) { selectedDate = ds; render(); }

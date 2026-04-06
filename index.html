@@ -139,36 +139,217 @@
 <div id="app"></div>
 
 <script>
-const PLAN = {
-  1: { title: '가슴 + 어깨', emoji: '💪', color: '#00c6ff', exercises: [
-    { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서', rest: 90 },
-    { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치', rest: 90 },
-    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!', rest: 60 },
-    { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로', rest: 60 },
-  ]},
-  2: { title: '등 + 이두', emoji: '🔙', color: '#7c3aed', exercises: [
-    { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동', rest: 90 },
-    { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기', rest: 90 },
-    { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정', rest: 60 },
-  ]},
-  3: { rest: true },
-  4: { title: '어깨 + 삼두', emoji: '🏋️', color: '#f59e0b', exercises: [
-    { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지', rest: 90 },
-    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수', rest: 60 },
-    { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감', rest: 60 },
-    { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기', rest: 60 },
-  ]},
-  5: { rest: true },
-  6: { title: '하체 + 허리 + 복근', emoji: '🦵', color: '#10b981', exercises: [
-    { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨', rest: 90 },
-    { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기', rest: 60 },
-    { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정', rest: 60 },
-    { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심', rest: 90 },
-    { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게', rest: 60 },
-    { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게', rest: 60 },
-  ]},
-  0: { rest: true }
+// ===== 페이즈 시스템 =====
+const START_DATE = '2026-04-06'; // 헬스 시작일
+
+function getTrainingWeek() {
+  const start = new Date(START_DATE + 'T00:00:00');
+  const today = new Date(todayStr + 'T00:00:00');
+  const diff = Math.max(0, Math.floor((today - start) / (1000*60*60*24)));
+  return Math.floor(diff / 7) + 1;
+}
+
+function getPhase() {
+  const w = getTrainingWeek();
+  if (w <= 4) return 1;
+  if (w <= 8) return 2;
+  if (w <= 16) return 3;
+  return 4;
+}
+
+const PHASE_INFO = {
+  1: { name: '적응기', desc: '폼 익히기 · 가벼운 중량', color: '#888', weeks: '1~4주' },
+  2: { name: '기초 근력', desc: '중량 올리기 시작', color: '#00c6ff', weeks: '5~8주' },
+  3: { name: '근비대', desc: '점진적 과부하 본격화', color: '#7c3aed', weeks: '9~16주' },
+  4: { name: '심화', desc: '고중량 + 테크닉', color: '#f59e0b', weeks: '17주+' },
 };
+
+const EXERCISE_DB = {
+  chest_tri: {
+    emoji: '💪', title: '가슴 + 삼두', color: '#00c6ff',
+    phases: {
+      1: [
+        { name: '벤치프레스', sets: 3, reps: '12회', weight: '빈 봉 20kg', tip: '폼 집중. 견갑골 모으고 등 살짝 아치', rest: 90 },
+        { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', weight: '8~10kg', tip: '45도 벤치. 상부 가슴 집중', rest: 90 },
+        { name: '케이블 크로스오버', sets: 3, reps: '15회', weight: '가벼운 중량', tip: '가슴 수축 느끼며 천천히', rest: 60 },
+        { name: '트라이셉스 푸시다운', sets: 3, reps: '15회', weight: '10~15kg', tip: '팔꿈치 고정. 완전히 펴기', rest: 60 },
+      ],
+      2: [
+        { name: '벤치프레스', sets: 4, reps: '10회', weight: '30~50kg', tip: '마지막 2개가 힘든 중량. +2.5kg씩 도전', rest: 90 },
+        { name: '인클라인 덤벨프레스', sets: 4, reps: '10회', weight: '12~16kg', tip: '상부 가슴 집중', rest: 90 },
+        { name: '딥스', sets: 3, reps: '8~10회', weight: '체중', tip: '앞으로 약간 기울면 가슴 집중', rest: 90 },
+        { name: '케이블 크로스오버', sets: 3, reps: '12회', weight: '중간 중량', tip: '완전 수축. 가슴 안쪽 라인', rest: 60 },
+        { name: '트라이셉스 오버헤드', sets: 3, reps: '12회', weight: '10~15kg', tip: '팔꿈치 안으로 모으기', rest: 60 },
+      ],
+      3: [
+        { name: '벤치프레스', sets: 4, reps: '8회', weight: '60~80% 최대중량', tip: '실패 직전 중량. 2초 내리기', rest: 120 },
+        { name: '인클라인 바벨프레스', sets: 4, reps: '8회', weight: '40~60kg', tip: '상부 가슴 핵심', rest: 90 },
+        { name: '딥스', sets: 3, reps: '실패까지', weight: '체중', tip: '가능하면 무게 추가', rest: 90 },
+        { name: '펙덱 플라이', sets: 3, reps: '12회', weight: '중-고 중량', tip: '가슴 최대 수축. 드롭셋 도전', rest: 60 },
+        { name: '클로즈그립 벤치프레스', sets: 3, reps: '10회', weight: '40~55kg', tip: '삼두 집중. 양손 어깨너비', rest: 75 },
+      ],
+      4: [
+        { name: '벤치프레스', sets: 5, reps: '6회', weight: '85% 최대중량', tip: '고중량 스피드 유지', rest: 180 },
+        { name: '인클라인 덤벨프레스', sets: 4, reps: '8회', weight: '22kg+', tip: '상부 가슴 포커스', rest: 90 },
+        { name: '딥스', sets: 4, reps: '8회', weight: '체중+10kg', tip: '벨트에 원판 추가', rest: 90 },
+        { name: '케이블 플라이 (로우)', sets: 3, reps: '12회', weight: '중간 중량', tip: '하부 가슴 선명도', rest: 60 },
+        { name: 'EZ바 트라이셉스', sets: 4, reps: '8회', weight: '30~40kg', tip: '삼두 장두 집중', rest: 75 },
+      ],
+    }
+  },
+  back_bi: {
+    emoji: '🔙', title: '등 + 이두', color: '#7c3aed',
+    phases: {
+      1: [
+        { name: '랫풀다운', sets: 3, reps: '12회', weight: '30~40kg', tip: '가슴 쪽으로 당기기. 등 넓이의 핵심', rest: 90 },
+        { name: '시티드 케이블로우', sets: 3, reps: '12회', weight: '30~40kg', tip: '허리 세우고 배꼽으로. 허리 부담 없음', rest: 90 },
+        { name: '덤벨 컬', sets: 3, reps: '15회', weight: '8~10kg', tip: '반동 금지. 팔꿈치 고정', rest: 60 },
+      ],
+      2: [
+        { name: '랫풀다운', sets: 4, reps: '10회', weight: '40~55kg', tip: '와이드그립. 등 넓이', rest: 90 },
+        { name: '시티드 케이블로우', sets: 4, reps: '10회', weight: '40~55kg', tip: '로우 자세 유지. 등 두께', rest: 90 },
+        { name: '원암 덤벨로우', sets: 3, reps: '10회', weight: '14~18kg', tip: '팔꿈치 뒤로 당기기', rest: 75 },
+        { name: '해머컬', sets: 3, reps: '12회', weight: '10~12kg', tip: '이두+전완근 동시 발달', rest: 60 },
+        { name: '컨센트레이션 컬', sets: 3, reps: '12회', weight: '8~12kg', tip: '이두 피크 만들기', rest: 60 },
+      ],
+      3: [
+        { name: '랫풀다운', sets: 4, reps: '8회', weight: '55~70kg', tip: '역그립 도전 = 이두 더 자극', rest: 90 },
+        { name: '시티드 케이블로우', sets: 4, reps: '8회', weight: '55~70kg', tip: '끝까지 당겨 2초 수축', rest: 90 },
+        { name: '원암 케이블로우', sets: 3, reps: '10회', weight: '20~30kg', tip: '스트레칭 최대화', rest: 75 },
+        { name: 'EZ바 컬', sets: 4, reps: '8회', weight: '20~30kg', tip: '손목 부담 적은 EZ바', rest: 75 },
+        { name: '인클라인 덤벨컬', sets: 3, reps: '10회', weight: '10~14kg', tip: '이두 최대 스트레칭', rest: 60 },
+      ],
+      4: [
+        { name: '랫풀다운', sets: 4, reps: '8회', weight: '70kg+', tip: '폼 유지하며 무게 올리기', rest: 90 },
+        { name: '시티드 케이블로우', sets: 4, reps: '8회', weight: '70kg+', tip: '등 두께 최대화', rest: 90 },
+        { name: '원암 덤벨로우', sets: 4, reps: '8회', weight: '22kg+', tip: '고중량으로 등 두께', rest: 75 },
+        { name: 'EZ바 컬', sets: 4, reps: '6~8회', weight: '35kg+', tip: '고중량 이두', rest: 90 },
+        { name: '해머컬', sets: 3, reps: '10회', weight: '14kg+', tip: '전완근+이두', rest: 60 },
+      ],
+    }
+  },
+  shoulder_abs: {
+    emoji: '🏋️', title: '어깨 + 복근', color: '#f59e0b',
+    phases: {
+      1: [
+        { name: '덤벨 숄더프레스', sets: 3, reps: '12회', weight: '8~10kg', tip: '귀 옆에서 위로. 허리 반동 금지', rest: 90 },
+        { name: '사이드 레터럴 레이즈', sets: 3, reps: '15회', weight: '5~6kg', tip: '어깨 넓히기 핵심! 무게보다 폼', rest: 60 },
+        { name: '프론트 레이즈', sets: 3, reps: '12회', weight: '5kg', tip: '전면 삼각근. 팔꿈치 살짝 구부림', rest: 60 },
+        { name: '플랭크', sets: 3, reps: '30초', weight: '체중', tip: '코어 수축. 일직선 유지', rest: 45 },
+        { name: '크런치', sets: 3, reps: '20회', weight: '체중', tip: '빠르지 않게. 복근 수축 느끼기', rest: 45 },
+      ],
+      2: [
+        { name: '덤벨 숄더프레스', sets: 4, reps: '10회', weight: '12~14kg', tip: '앉아서 등 지지하며', rest: 90 },
+        { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', weight: '7~8kg', tip: '소지 쪽이 위로 오게', rest: 60 },
+        { name: '리어 델트 플라이', sets: 3, reps: '15회', weight: '6~8kg', tip: '후면 삼각근. 어깨 입체감', rest: 60 },
+        { name: '케이블 페이스풀', sets: 3, reps: '15회', weight: '15~20kg', tip: '어깨 건강 필수! 외회전 자극', rest: 60 },
+        { name: '행잉 레그레이즈', sets: 3, reps: '12회', weight: '체중', tip: '하복부 집중. 반동 금지', rest: 60 },
+      ],
+      3: [
+        { name: '바벨 오버헤드프레스', sets: 4, reps: '8회', weight: '30~50kg', tip: '서서 하기. 코어+어깨 동시', rest: 120 },
+        { name: '사이드 레터럴 레이즈', sets: 4, reps: '12회', weight: '8~10kg', tip: '마지막 세트 드롭셋 도전!', rest: 60 },
+        { name: '리어 델트 머신', sets: 3, reps: '12회', weight: '중간 중량', tip: '후면 어깨 집중', rest: 60 },
+        { name: '케이블 페이스풀', sets: 3, reps: '15회', weight: '20~25kg', tip: '어깨 부상 예방', rest: 60 },
+        { name: '케이블 크런치', sets: 3, reps: '15회', weight: '20~30kg', tip: '복직근 두께', rest: 45 },
+        { name: '레그레이즈 (벤치)', sets: 3, reps: '15회', weight: '체중', tip: '하복부 V라인', rest: 45 },
+      ],
+      4: [
+        { name: '바벨 오버헤드프레스', sets: 5, reps: '6회', weight: '50kg+', tip: '어깨 최강 운동. 고중량', rest: 180 },
+        { name: '사이드 레터럴 레이즈', sets: 5, reps: '12회', weight: '10~12kg', tip: '1·1·1 테크닉 도전', rest: 60 },
+        { name: '업라이트 로우', sets: 3, reps: '10회', weight: '30~40kg', tip: '삼각근+승모근', rest: 75 },
+        { name: '케이블 페이스풀', sets: 4, reps: '15회', weight: '25~30kg', tip: '어깨 건강 = 지속 성장', rest: 60 },
+        { name: '케이블 크런치', sets: 4, reps: '12회', weight: '35kg+', tip: '복근 두께 최대화', rest: 45 },
+      ],
+    }
+  },
+  legs: {
+    emoji: '🦵', title: '하체', color: '#10b981',
+    phases: {
+      1: [
+        { name: '레그프레스', sets: 3, reps: '12회', weight: '50~80kg', tip: '무릎이 발끝 방향으로. 허리 부담 없음', rest: 90 },
+        { name: '레그 익스텐션', sets: 3, reps: '15회', weight: '30~40kg', tip: '대퇴사두 고립. 천천히 내리기', rest: 60 },
+        { name: '레그 컬', sets: 3, reps: '15회', weight: '25~35kg', tip: '햄스트링. 골반 고정', rest: 60 },
+        { name: '힙 쓰러스트', sets: 3, reps: '12회', weight: '봉 or 체중', tip: '둔근+허리 강화. 허리 걱정 없음', rest: 75 },
+        { name: '카프레이즈', sets: 3, reps: '20회', weight: '체중', tip: '종아리 끝까지 올리기', rest: 45 },
+      ],
+      2: [
+        { name: '레그프레스', sets: 4, reps: '10회', weight: '100~140kg', tip: '중량 올려가기. 무릎 90도', rest: 90 },
+        { name: '고블릿 스쿼트', sets: 3, reps: '12회', weight: '16~20kg', tip: '덤벨 잡고 스쿼트. 허리 부담 적음', rest: 90 },
+        { name: '레그 컬', sets: 4, reps: '10회', weight: '35~45kg', tip: '햄스트링 강화', rest: 60 },
+        { name: '힙 쓰러스트', sets: 4, reps: '10회', weight: '40~60kg', tip: '바벨 추가. 둔근+허리 강화', rest: 75 },
+        { name: '카프레이즈', sets: 4, reps: '15회', weight: '체중+덤벨', tip: '한발씩 도전', rest: 45 },
+      ],
+      3: [
+        { name: '레그프레스', sets: 4, reps: '8회', weight: '160~200kg', tip: '고중량 도전', rest: 120 },
+        { name: '고블릿 스쿼트', sets: 4, reps: '10회', weight: '24~28kg', tip: '무거운 덤벨로', rest: 90 },
+        { name: '불가리안 스플릿 스쿼트', sets: 3, reps: '10회', weight: '8~12kg', tip: '뒷발 벤치에. 균형+근력', rest: 90 },
+        { name: '레그 컬', sets: 4, reps: '10회', weight: '45~55kg', tip: '햄스트링 두께', rest: 75 },
+        { name: '힙 쓰러스트', sets: 4, reps: '8회', weight: '60~80kg', tip: '고중량 바벨', rest: 90 },
+        { name: '카프레이즈', sets: 4, reps: '15회', weight: '체중+덤벨', tip: '파우저 도전', rest: 45 },
+      ],
+      4: [
+        { name: '레그프레스', sets: 5, reps: '6~8회', weight: '200kg+', tip: '최대 중량', rest: 180 },
+        { name: '핵 스쿼트', sets: 4, reps: '8회', weight: '80~100kg', tip: '기계 스쿼트. 허리 안전', rest: 120 },
+        { name: '불가리안 스플릿 스쿼트', sets: 4, reps: '8회', weight: '14kg+ 덤벨', tip: '고중량', rest: 90 },
+        { name: '레그 컬', sets: 4, reps: '8회', weight: '55kg+', tip: '스트레칭 최대화', rest: 75 },
+        { name: '힙 쓰러스트', sets: 4, reps: '8회', weight: '80kg+', tip: '허리+둔근 최강', rest: 90 },
+        { name: '카프레이즈', sets: 5, reps: '12회', weight: '체중+덤벨', tip: '종아리 분리', rest: 45 },
+      ],
+    }
+  },
+  fullbody: {
+    emoji: '🔥', title: '전신 보강', color: '#ef4444',
+    phases: {
+      1: [
+        { name: '레그프레스', sets: 2, reps: '15회', weight: '가볍게', tip: '가벼운 컨디션 체크', rest: 75 },
+        { name: '랫풀다운', sets: 2, reps: '15회', weight: '가볍게', tip: '등 가볍게 펌핑', rest: 75 },
+        { name: '덤벨 숄더프레스', sets: 2, reps: '15회', weight: '가볍게', tip: '어깨 전체 자극', rest: 60 },
+        { name: '플랭크', sets: 3, reps: '40초', weight: '체중', tip: '코어 강화', rest: 45 },
+        { name: '트레드밀 (가볍게)', sets: 1, reps: '15분', weight: '-', tip: '유산소. 심폐 향상', rest: 0 },
+      ],
+      2: [
+        { name: '레그프레스', sets: 3, reps: '12회', weight: '적당히', tip: '가벼운 하체', rest: 75 },
+        { name: '랫풀다운', sets: 3, reps: '12회', weight: '적당히', tip: '등 펌핑', rest: 75 },
+        { name: '벤치프레스', sets: 3, reps: '12회', weight: '적당히', tip: '가슴 가볍게', rest: 75 },
+        { name: '케이블 크런치', sets: 3, reps: '15회', weight: '20kg', tip: '복근 자극', rest: 45 },
+        { name: '트레드밀 or 사이클', sets: 1, reps: '20분', weight: '-', tip: '지방 연소', rest: 0 },
+      ],
+      3: [
+        { name: '취약 부위 집중', sets: 4, reps: '10회', weight: '적당히', tip: '본인 약점 부위 선택', rest: 75 },
+        { name: '슈퍼셋 (가슴+등)', sets: 3, reps: '12회', weight: '중간', tip: '쉬지 않고 번갈아서', rest: 60 },
+        { name: '케이블 크런치', sets: 4, reps: '12회', weight: '25kg+', tip: '복근 두께', rest: 45 },
+        { name: '인터벌 트레이닝', sets: 1, reps: '20분', weight: '-', tip: '30초 전력 / 30초 회복', rest: 0 },
+      ],
+      4: [
+        { name: '취약 부위 고강도', sets: 5, reps: '8회', weight: '고중량', tip: '가장 약한 부위 집중', rest: 90 },
+        { name: '슈퍼셋 A (가슴+등)', sets: 4, reps: '10회', weight: '중-고', tip: '쉬지 않고 번갈아', rest: 60 },
+        { name: '슈퍼셋 B (이두+삼두)', sets: 3, reps: '12회', weight: '중간', tip: '팔 집중', rest: 60 },
+        { name: '케이블 크런치', sets: 4, reps: '10회', weight: '35kg+', tip: '복근 최대 부하', rest: 45 },
+      ],
+    }
+  },
+};
+
+const DAY_MAP = {
+  1: 'chest_tri',    // 월: 가슴+삼두
+  2: 'back_bi',      // 화: 등+이두
+  3: null,           // 수: 휴식
+  4: 'shoulder_abs', // 목: 어깨+복근
+  5: 'legs',         // 금: 하체
+  6: 'fullbody',     // 토: 전신 보강
+  0: null,           // 일: 휴식
+};
+
+function getPlan(dow) {
+  const key = DAY_MAP[dow];
+  if (!key) return { rest: true };
+  const db = EXERCISE_DB[key];
+  const phase = getPhase();
+  return { title: db.title, emoji: db.emoji, color: db.color, exercises: db.phases[phase], rest: false };
+}
+
+// 기존 PLAN 참조를 getPlan()으로 대체
+const PLAN = new Proxy({}, { get: (_, dow) => getPlan(Number(dow)) });
 
 const WARMUP = [
   { name: '고양이-소 스트레칭', duration: '1분', tip: '척추 풀기. 천천히 호흡하면서' },
@@ -279,10 +460,13 @@ function renderWorkout(dateStr) {
   const dateLabel = isToday ? realToday.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }) : formatDateKo(dateStr);
 
   let html = '';
+  const phaseInfo = PHASE_INFO[getPhase()];
+  const week = getTrainingWeek();
   html += `<div class="header">
     <div class="date">${dateLabel}</div>
     <div class="day-title">${plan && !plan.rest ? plan.emoji + ' ' + plan.title : '🛌 휴식일'}</div>
     ${!plan?.rest ? `<div class="day-sub">${doneSets} / ${totalSets} 세트 완료</div>` : ''}
+    ${isToday ? `<div style="margin-top:8px;display:inline-block;background:${phaseInfo.color}22;border:1px solid ${phaseInfo.color}55;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;color:${phaseInfo.color}">${week}주차 · ${phaseInfo.name} · ${phaseInfo.desc}</div>` : ''}
   </div>
   <div class="progress-bar"><div class="progress-fill" style="width:${totalSets>0?(doneSets/totalSets*100):0}%"></div></div>`;
 
@@ -315,6 +499,7 @@ function renderWorkout(dateStr) {
       html += `<div class="exercise-card ${exDone?'done':''}">
         <div class="ex-top"><div class="ex-name">${ex.name}</div><div class="ex-done-badge">완료</div></div>
         <div class="ex-info">${ex.sets}세트 × ${ex.reps} · ${ex.tip}</div>
+        ${ex.weight ? `<div style="font-size:11px;color:#f59e0b;margin-top:4px;font-weight:600;">⚖️ ${ex.weight}</div>` : ''}
         <div class="sets-row">`;
       for (let s = 0; s < ex.sets; s++) {
         const done = state.sets[`${ei}_${s}`] || false;

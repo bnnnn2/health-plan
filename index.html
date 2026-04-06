@@ -8,6 +8,12 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0f0f0f; color: #fff; font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; min-height: 100vh; }
 
+  /* 탭 */
+  .tab-bar { display: flex; background: #1a1a1a; border-bottom: 1px solid #2a2a2a; }
+  .tab-btn { flex: 1; padding: 14px 0; text-align: center; font-size: 14px; font-weight: 600; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab-btn.active { color: #00c6ff; border-bottom-color: #00c6ff; }
+
+  /* 헤더 */
   .header { background: #1a1a1a; padding: 20px 16px 16px; text-align: center; border-bottom: 1px solid #2a2a2a; }
   .header .date { font-size: 13px; color: #888; margin-bottom: 4px; }
   .header .day-title { font-size: 22px; font-weight: 700; }
@@ -19,38 +25,17 @@
   .section { margin: 16px 12px 0; }
   .section-title { font-size: 12px; color: #888; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; padding-left: 4px; }
 
-  .exercise-card {
-    background: #1a1a1a;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 10px;
-    border: 1.5px solid #2a2a2a;
-    transition: border-color 0.2s;
-  }
+  .exercise-card { background: #1a1a1a; border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1.5px solid #2a2a2a; transition: border-color 0.2s; }
   .exercise-card.done { border-color: #00c6ff44; background: #00c6ff08; }
-
   .ex-top { display: flex; align-items: center; justify-content: space-between; }
   .ex-name { font-size: 16px; font-weight: 600; }
   .ex-done-badge { font-size: 12px; color: #00c6ff; font-weight: 700; display: none; }
   .exercise-card.done .ex-done-badge { display: block; }
   .exercise-card.done .ex-name { color: #555; }
-
   .ex-info { font-size: 12px; color: #666; margin-top: 4px; }
 
   .sets-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .set-btn {
-    width: 44px; height: 44px;
-    border-radius: 10px;
-    border: 2px solid #333;
-    background: #222;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .set-btn { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #333; background: #222; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
   .set-btn:active { transform: scale(0.92); }
   .set-btn.completed { background: #00c6ff22; border-color: #00c6ff; color: #00c6ff; }
   .set-btn.completed::after { content: '✓'; }
@@ -61,90 +46,81 @@
   .rest-day h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .rest-day p { color: #888; font-size: 14px; line-height: 1.6; }
 
-  .complete-banner {
-    background: linear-gradient(135deg, #00c6ff22, #0072ff22);
-    border: 1.5px solid #00c6ff55;
-    border-radius: 14px;
-    padding: 20px;
-    text-align: center;
-    margin: 16px 12px;
-    display: none;
-  }
+  .complete-banner { background: linear-gradient(135deg, #00c6ff22, #0072ff22); border: 1.5px solid #00c6ff55; border-radius: 14px; padding: 20px; text-align: center; margin: 16px 12px; display: none; }
   .complete-banner.show { display: block; }
   .complete-banner h3 { font-size: 18px; font-weight: 700; color: #00c6ff; }
   .complete-banner p { font-size: 13px; color: #888; margin-top: 6px; }
 
   .bottom-space { height: 40px; }
 
-  .nav-dots { display: flex; justify-content: center; gap: 8px; padding: 16px; }
-  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
-  .nav-dot.active { background: #00c6ff; }
-  .nav-dot.workout { background: #444; }
+  /* 캘린더 */
+  .calendar-wrap { padding: 16px 12px; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .cal-nav button { background: #1a1a1a; border: 1px solid #2a2a2a; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  .cal-nav .cal-month { font-size: 18px; font-weight: 700; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { text-align: center; font-size: 11px; color: #666; padding: 4px 0; font-weight: 600; }
+  .cal-dow:first-child { color: #ff6b6b; }
+  .cal-dow:last-child { color: #5b8fff; }
+  .cal-cell { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; background: #1a1a1a; border: 1.5px solid transparent; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+  .cal-cell:active { transform: scale(0.93); }
+  .cal-cell.empty { background: transparent; cursor: default; }
+  .cal-cell.today { border-color: #00c6ff; }
+  .cal-cell.selected { background: #00c6ff22; border-color: #00c6ff; }
+  .cal-cell.rest-type { opacity: 0.4; }
+  .cal-cell .cal-num { font-size: 14px; font-weight: 600; }
+  .cal-cell.sun .cal-num { color: #ff6b6b; }
+  .cal-cell.sat .cal-num { color: #5b8fff; }
+  .cal-cell .cal-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 3px; }
+  .cal-cell .cal-dot.completed { background: #00c6ff; }
+  .cal-cell .cal-dot.workout { background: #333; }
+  .cal-cell .cal-dot.partial { background: #f59e0b; }
 
-  .tip-box { background: #1a1a1a; border-radius: 12px; padding: 14px 16px; margin: 0 12px 10px; border-left: 3px solid #0072ff; }
-  .tip-box p { font-size: 13px; color: #aaa; line-height: 1.6; }
+  /* 캘린더 하단 선택 날짜 운동 요약 */
+  .cal-detail { margin: 16px 0 0; background: #1a1a1a; border-radius: 14px; padding: 16px; border: 1.5px solid #2a2a2a; }
+  .cal-detail h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .cal-detail-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #2a2a2a; }
+  .cal-detail-item:last-child { border-bottom: none; }
+  .cal-detail-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; flex-shrink: 0; }
+  .cal-detail-dot.done { background: #00c6ff; }
+  .cal-detail-name { font-size: 14px; flex: 1; }
+  .cal-detail-sets { font-size: 12px; color: #666; }
+  .cal-detail-sets.done { color: #00c6ff; }
 </style>
 </head>
 <body>
-
 <div id="app"></div>
 
 <script>
 const PLAN = {
-  1: { // 월
-    title: '가슴 + 어깨',
-    emoji: '💪',
-    color: '#00c6ff',
-    exercises: [
-      { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서' },
-      { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치' },
-      { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!' },
-      { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로' },
-    ]
-  },
-  2: { // 화
-    title: '등 + 이두',
-    emoji: '🔙',
-    color: '#7c3aed',
-    exercises: [
-      { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동' },
-      { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기' },
-      { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정' },
-    ]
-  },
-  3: { // 수 - 휴식
-    rest: true
-  },
-  4: { // 목
-    title: '어깨 + 삼두',
-    emoji: '🏋️',
-    color: '#f59e0b',
-    exercises: [
-      { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지' },
-      { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수' },
-      { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감' },
-      { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기' },
-    ]
-  },
-  5: { // 금 - 휴식
-    rest: true
-  },
-  6: { // 토
-    title: '하체 + 허리 + 복근',
-    emoji: '🦵',
-    color: '#10b981',
-    exercises: [
-      { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨' },
-      { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기' },
-      { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정' },
-      { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심' },
-      { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게' },
-      { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게' },
-    ]
-  },
-  0: { // 일 - 휴식
-    rest: true
-  }
+  1: { title: '가슴 + 어깨', emoji: '💪', color: '#00c6ff', exercises: [
+    { name: '벤치프레스', sets: 4, reps: '10회', tip: '빈 바(20kg)부터 시작. 등 살짝 아치, 견갑골 모아서' },
+    { name: '인클라인 덤벨프레스', sets: 3, reps: '12회', tip: '8~10kg 덤벨. 45도 각도 벤치' },
+    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '5~6kg. 어깨 넓히기 핵심 운동!' },
+    { name: '프론트 레이즈', sets: 3, reps: '12회', tip: '5kg. 팔꿈치 살짝 구부린 채로' },
+  ]},
+  2: { title: '등 + 이두', emoji: '🔙', color: '#7c3aed', exercises: [
+    { name: '랫풀다운', sets: 4, reps: '10회', tip: '가슴 쪽으로 당기기. 턱걸이 대체 운동' },
+    { name: '시티드 로우', sets: 3, reps: '12회', tip: '허리 세우고 배꼽 쪽으로 당기기' },
+    { name: '덤벨 컬', sets: 3, reps: '15회', tip: '반동 금지. 팔꿈치 고정' },
+  ]},
+  3: { rest: true },
+  4: { title: '어깨 + 삼두', emoji: '🏋️', color: '#f59e0b', exercises: [
+    { name: '덤벨 숄더프레스', sets: 4, reps: '10회', tip: '귀 옆에서 시작해서 위로. 허리 반동 금지' },
+    { name: '사이드 레터럴 레이즈', sets: 4, reps: '15회', tip: '어깨 넓히기 핵심! 주 2회 필수' },
+    { name: '리어 델트 플라이', sets: 3, reps: '15회', tip: '앞으로 숙여서 뒤로 벌리기. 어깨 입체감' },
+    { name: '케이블 푸시다운', sets: 3, reps: '12회', tip: '팔꿈치 고정. 아래로 쭉 펴기' },
+  ]},
+  5: { rest: true },
+  6: { title: '하체 + 허리 + 복근', emoji: '🦵', color: '#10b981', exercises: [
+    { name: '레그프레스', sets: 4, reps: '12회', tip: '무릎이 발끝 넘지 않게. 엉덩이 들리면 안 됨' },
+    { name: '레그 익스텐션', sets: 3, reps: '15회', tip: '허벅지 앞쪽 고립. 천천히 내리기' },
+    { name: '레그 컬', sets: 3, reps: '15회', tip: '허벅지 뒤쪽. 골반 고정' },
+    { name: '루마니안 데드리프트', sets: 3, reps: '12회', tip: '허리 곧게! 엉덩이 뒤로 빼면서 내리기. 허리 강화 핵심' },
+    { name: '백 익스텐션', sets: 3, reps: '15회', tip: '허리 기립근 강화. 오래 걸어도 안 아프게' },
+    { name: '플랭크', sets: 3, reps: '1분', tip: '코어 수축. 엉덩이 내려가지 않게' },
+  ]},
+  0: { rest: true }
 };
 
 const WARMUP = [
@@ -153,7 +129,6 @@ const WARMUP = [
   { name: '흉추 회전 스트레칭', duration: '1분', tip: '뻣뻣한 등 풀기' },
   { name: '트레드밀 워킹', duration: '7분', tip: '가볍게 걷기. 몸 깨우기' },
 ];
-
 const COOLDOWN = [
   { name: '가슴 스트레칭', duration: '30초', tip: '벽에 손 짚고 몸 돌리기' },
   { name: '어깨 교차 스트레칭', duration: '30초', tip: '팔 가슴 앞으로 당기기' },
@@ -161,31 +136,44 @@ const COOLDOWN = [
   { name: '허리 돌리기', duration: '1분', tip: '앉아서 좌우로 천천히' },
 ];
 
-// 상태 저장
-const today = new Date();
-const dayKey = today.getDay();
-const dateStr = today.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
-const storageKey = `workout_${today.toISOString().slice(0,10)}`;
+const realToday = new Date();
+const todayStr = realToday.toISOString().slice(0,10);
 
-let state = JSON.parse(localStorage.getItem(storageKey) || 'null') || {
-  warmup: new Array(WARMUP.length).fill(false),
-  sets: {},
-  cooldown: new Array(COOLDOWN.length).fill(false),
-};
+// 현재 탭: 'today' | 'calendar'
+let currentTab = 'today';
+// 오늘 기준 선택 날짜
+let selectedDate = todayStr;
+// 달력 표시 년월
+let calYear = realToday.getFullYear();
+let calMonth = realToday.getMonth();
 
-function save() {
-  localStorage.setItem(storageKey, JSON.stringify(state));
+function getStorageKey(dateStr) { return `workout_${dateStr}`; }
+
+function getState(dateStr) {
+  return JSON.parse(localStorage.getItem(getStorageKey(dateStr)) || 'null') || {
+    warmup: new Array(WARMUP.length).fill(false),
+    sets: {},
+    cooldown: new Array(COOLDOWN.length).fill(false),
+  };
 }
 
-function getTotalSets() {
-  const plan = PLAN[dayKey];
+function saveState(dateStr, state) {
+  localStorage.setItem(getStorageKey(dateStr), JSON.stringify(state));
+}
+
+function getDayOfWeek(dateStr) {
+  return new Date(dateStr + 'T00:00:00').getDay();
+}
+
+function getTotalSets(dow) {
+  const plan = PLAN[dow];
   if (!plan || plan.rest) return 0;
   return plan.exercises.reduce((a, e) => a + e.sets, 0);
 }
 
-function getDoneSets() {
+function getDoneSetsFromState(dow, state) {
   let done = 0;
-  const plan = PLAN[dayKey];
+  const plan = PLAN[dow];
   if (!plan || plan.rest) return 0;
   plan.exercises.forEach((ex, ei) => {
     for (let s = 0; s < ex.sets; s++) {
@@ -195,127 +183,196 @@ function getDoneSets() {
   return done;
 }
 
-function isAllDone() {
-  return getTotalSets() > 0 && getDoneSets() >= getTotalSets();
+// 날짜 상태: 'completed' | 'partial' | 'workout' | 'rest'
+function getDayStatus(dateStr) {
+  const dow = getDayOfWeek(dateStr);
+  const plan = PLAN[dow];
+  if (!plan || plan.rest) return 'rest';
+  const total = getTotalSets(dow);
+  const state = getState(dateStr);
+  const done = getDoneSetsFromState(dow, state);
+  if (done === 0) return 'workout';
+  if (done >= total) return 'completed';
+  return 'partial';
 }
 
-function render() {
-  const plan = PLAN[dayKey];
-  let html = '';
+function formatDateKo(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+}
 
-  // 헤더
-  const dayNames = ['일','월','화','수','목','금','토'];
-  html += `
-    <div class="header">
-      <div class="date">${dateStr}</div>
-      <div class="day-title">${plan && !plan.rest ? plan.emoji + ' ' + plan.title : '🛌 휴식일'}</div>
-      ${!plan?.rest ? `<div class="day-sub">${getDoneSets()} / ${getTotalSets()} 세트 완료</div>` : ''}
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width: ${getTotalSets() > 0 ? (getDoneSets()/getTotalSets()*100) : 0}%"></div>
-    </div>
-  `;
+// ===== 렌더 =====
+function render() {
+  let html = '';
+  html += `<div class="tab-bar">
+    <div class="tab-btn ${currentTab==='today'?'active':''}" onclick="switchTab('today')">오늘 운동</div>
+    <div class="tab-btn ${currentTab==='calendar'?'active':''}" onclick="switchTab('calendar')">📅 달력</div>
+  </div>`;
+
+  if (currentTab === 'today') {
+    html += renderWorkout(todayStr);
+  } else {
+    html += renderCalendar();
+  }
+
+  html += `<div class="bottom-space"></div>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function renderWorkout(dateStr) {
+  const dow = getDayOfWeek(dateStr);
+  const plan = PLAN[dow];
+  const state = getState(dateStr);
+  const isToday = dateStr === todayStr;
+  const totalSets = getTotalSets(dow);
+  const doneSets = getDoneSetsFromState(dow, state);
+  const allDone = totalSets > 0 && doneSets >= totalSets;
+  const dateLabel = isToday ? realToday.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }) : formatDateKo(dateStr);
+
+  let html = '';
+  html += `<div class="header">
+    <div class="date">${dateLabel}</div>
+    <div class="day-title">${plan && !plan.rest ? plan.emoji + ' ' + plan.title : '🛌 휴식일'}</div>
+    ${!plan?.rest ? `<div class="day-sub">${doneSets} / ${totalSets} 세트 완료</div>` : ''}
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:${totalSets>0?(doneSets/totalSets*100):0}%"></div></div>`;
 
   if (plan?.rest) {
-    html += `
-      <div class="rest-day">
-        <div class="icon">🛌</div>
-        <h2>오늘은 휴식일</h2>
-        <p>근육은 쉬는 동안 성장해.<br>충분한 수면과 단백질 섭취 잊지 마.</p>
-      </div>
-    `;
+    html += `<div class="rest-day"><div class="icon">🛌</div><h2>휴식일</h2><p>근육은 쉬는 동안 성장해.<br>충분한 수면과 단백질 섭취!</p></div>`;
   } else {
+    html += `<div class="complete-banner ${allDone?'show':''}"><h3>💪 운동 완료!</h3><p>쿨다운까지 마무리하면 완벽해</p></div>`;
 
-    // 완료 배너
-    html += `<div class="complete-banner ${isAllDone() ? 'show' : ''}">
-      <h3>💪 오늘 운동 완료!</h3>
-      <p>쿨다운까지 마무리하면 완벽해</p>
-    </div>`;
-
-    // 워밍업
     html += `<div class="section"><div class="section-title">🔥 워밍업 (10분)</div>`;
     WARMUP.forEach((w, i) => {
       const done = state.warmup[i];
-      html += `
-        <div class="exercise-card ${done ? 'done' : ''}" onclick="toggleWarmup(${i})">
-          <div class="ex-top">
-            <div class="ex-name">${w.name}</div>
-            <div class="ex-done-badge">완료</div>
-          </div>
-          <div class="ex-info">${w.duration} · ${w.tip}</div>
-        </div>
-      `;
+      html += `<div class="exercise-card ${done?'done':''}" onclick="toggleWarmup('${dateStr}',${i})">
+        <div class="ex-top"><div class="ex-name">${w.name}</div><div class="ex-done-badge">완료</div></div>
+        <div class="ex-info">${w.duration} · ${w.tip}</div>
+      </div>`;
     });
     html += `</div>`;
 
-    // 본 운동
     html += `<div class="section"><div class="section-title">💪 본 운동</div>`;
     plan.exercises.forEach((ex, ei) => {
-      const doneSets = Array.from({length: ex.sets}, (_, s) => state.sets[`${ei}_${s}`] || false);
-      const allDone = doneSets.every(Boolean);
-      html += `
-        <div class="exercise-card ${allDone ? 'done' : ''}">
-          <div class="ex-top">
-            <div class="ex-name">${ex.name}</div>
-            <div class="ex-done-badge">완료</div>
-          </div>
-          <div class="ex-info">${ex.sets}세트 × ${ex.reps} · ${ex.tip}</div>
-          <div class="sets-row">
-      `;
+      const doneSetsArr = Array.from({length: ex.sets}, (_, s) => state.sets[`${ei}_${s}`] || false);
+      const exDone = doneSetsArr.every(Boolean);
+      html += `<div class="exercise-card ${exDone?'done':''}">
+        <div class="ex-top"><div class="ex-name">${ex.name}</div><div class="ex-done-badge">완료</div></div>
+        <div class="ex-info">${ex.sets}세트 × ${ex.reps} · ${ex.tip}</div>
+        <div class="sets-row">`;
       for (let s = 0; s < ex.sets; s++) {
         const done = state.sets[`${ei}_${s}`] || false;
-        html += `<button class="set-btn ${done ? 'completed' : ''}" onclick="toggleSet(${ei}, ${s})">
-          <span>${s+1}</span>
-        </button>`;
+        html += `<button class="set-btn ${done?'completed':''}" onclick="toggleSet('${dateStr}',${ei},${s})"><span>${s+1}</span></button>`;
       }
       html += `</div></div>`;
     });
     html += `</div>`;
 
-    // 쿨다운
     html += `<div class="section"><div class="section-title">❄️ 쿨다운 (5분)</div>`;
     COOLDOWN.forEach((c, i) => {
       const done = state.cooldown[i];
-      html += `
-        <div class="exercise-card ${done ? 'done' : ''}" onclick="toggleCooldown(${i})">
-          <div class="ex-top">
-            <div class="ex-name">${c.name}</div>
-            <div class="ex-done-badge">완료</div>
-          </div>
-          <div class="ex-info">${c.duration} · ${c.tip}</div>
-        </div>
-      `;
+      html += `<div class="exercise-card ${done?'done':''}" onclick="toggleCooldown('${dateStr}',${i})">
+        <div class="ex-top"><div class="ex-name">${c.name}</div><div class="ex-done-badge">완료</div></div>
+        <div class="ex-info">${c.duration} · ${c.tip}</div>
+      </div>`;
     });
     html += `</div>`;
   }
+  return html;
+}
 
-  // 요일 네비
-  html += `<div class="nav-dots">`;
-  ['일','월','화','수','목','금','토'].forEach((d, i) => {
-    const hasPlan = PLAN[i] && !PLAN[i].rest;
-    html += `<div class="nav-dot ${i === dayKey ? 'active' : (hasPlan ? 'workout' : '')}" title="${d}"></div>`;
-  });
+function renderCalendar() {
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const dowLabels = ['일','월','화','수','목','금','토'];
+
+  let html = `<div class="calendar-wrap">
+    <div class="cal-nav">
+      <button onclick="calPrev()">◀</button>
+      <div class="cal-month">${calYear}년 ${monthNames[calMonth]}</div>
+      <button onclick="calNext()">▶</button>
+    </div>
+    <div class="cal-grid">`;
+
+  dowLabels.forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
+
+  for (let i = 0; i < firstDay; i++) { html += `<div class="cal-cell empty"></div>`; }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow = new Date(ds + 'T00:00:00').getDay();
+    const status = getDayStatus(ds);
+    const isToday = ds === todayStr;
+    const isSelected = ds === selectedDate;
+    const isSun = dow === 0;
+    const isSat = dow === 6;
+    const dotClass = status === 'completed' ? 'completed' : status === 'partial' ? 'partial' : status === 'workout' ? 'workout' : '';
+
+    html += `<div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''} ${status==='rest'?'rest-type':''} ${isSun?'sun':''} ${isSat?'sat':''}" onclick="selectDate('${ds}')">
+      <div class="cal-num">${d}</div>
+      ${dotClass ? `<div class="cal-dot ${dotClass}"></div>` : '<div style="height:8px"></div>'}
+    </div>`;
+  }
   html += `</div>`;
 
-  html += `<div class="bottom-space"></div>`;
+  // 선택한 날짜 운동 요약
+  const selDow = getDayOfWeek(selectedDate);
+  const selPlan = PLAN[selDow];
+  const selState = getState(selectedDate);
+  const selDate = new Date(selectedDate + 'T00:00:00');
+  const selLabel = selDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
 
-  document.getElementById('app').innerHTML = html;
+  html += `<div class="cal-detail">
+    <h3>${selLabel} ${selPlan && !selPlan.rest ? selPlan.emoji + ' ' + selPlan.title : '🛌 휴식일'}</h3>`;
+
+  if (selPlan && !selPlan.rest) {
+    selPlan.exercises.forEach((ex, ei) => {
+      const doneSets = Array.from({length: ex.sets}, (_, s) => selState.sets[`${ei}_${s}`] || false).filter(Boolean).length;
+      const exDone = doneSets === ex.sets;
+      html += `<div class="cal-detail-item">
+        <div class="cal-detail-dot ${exDone?'done':''}"></div>
+        <div class="cal-detail-name">${ex.name}</div>
+        <div class="cal-detail-sets ${exDone?'done':''}">${doneSets}/${ex.sets} 세트</div>
+      </div>`;
+    });
+
+    // 선택 날짜가 오늘이면 바로가기 버튼
+    if (selectedDate === todayStr) {
+      html += `<div style="margin-top:12px;text-align:center">
+        <button onclick="switchTab('today')" style="background:#00c6ff22;border:1px solid #00c6ff55;color:#00c6ff;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">지금 운동 시작 →</button>
+      </div>`;
+    }
+  } else {
+    html += `<div style="color:#666;font-size:14px;padding:8px 0">오늘은 쉬어가는 날!</div>`;
+  }
+
+  html += `</div>`;
+
+  // 범례
+  html += `<div style="display:flex;gap:16px;padding:12px 4px;font-size:12px;color:#666;">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#00c6ff"></div>완료</div>
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></div>일부완료</div>
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#333"></div>운동일</div>
+  </div>`;
+
+  html += `</div>`;
+  return html;
 }
 
-function toggleWarmup(i) {
-  state.warmup[i] = !state.warmup[i];
-  save(); render();
-}
+function switchTab(tab) { currentTab = tab; render(); }
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} render(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} render(); }
+function selectDate(ds) { selectedDate = ds; render(); }
 
-function toggleSet(ei, s) {
-  const key = `${ei}_${s}`;
-  state.sets[key] = !state.sets[key];
-  save(); render();
+function toggleWarmup(dateStr, i) {
+  const s = getState(dateStr); s.warmup[i] = !s.warmup[i]; saveState(dateStr, s); render();
 }
-
-function toggleCooldown(i) {
-  state.cooldown[i] = !state.cooldown[i];
-  save(); render();
+function toggleSet(dateStr, ei, s) {
+  const st = getState(dateStr); const key=`${ei}_${s}`; st.sets[key]=!st.sets[key]; saveState(dateStr, st); render();
+}
+function toggleCooldown(dateStr, i) {
+  const s = getState(dateStr); s.cooldown[i] = !s.cooldown[i]; saveState(dateStr, s); render();
 }
 
 render();
